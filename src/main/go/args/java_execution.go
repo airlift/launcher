@@ -6,12 +6,37 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 )
 
 func getArchSpecificDirectory() string {
 	return fmt.Sprintf("%s-%s", runtime.GOOS, runtime.GOARCH)
+}
+
+func DetectJvmVersion(javaBin string) (string, error) {
+	command := exec.Command(javaBin, "-version")
+	output, err := command.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("could not exec java to determine jvm version: %w", err)
+	}
+
+	return ExtractJvmVersion(string(output))
+}
+
+func ExtractJvmVersion(output string) (string, error) {
+	regex := regexp.MustCompile("version \"(.*)\"")
+	matches := regex.FindStringSubmatch(output)
+	if len(matches) != 2 {
+		return "", fmt.Errorf("unrecognized java version output: %s", output)
+	}
+	return matches[1], nil
+}
+
+func GetMajorJavaVersion(javaVersion string) string {
+	components := strings.Split(javaVersion, ".")
+	return components[0]
 }
 
 func (options *Options) JavaExecution(daemonize bool) ([]string, []string, error) {
@@ -25,6 +50,11 @@ func (options *Options) JavaExecution(daemonize bool) ([]string, []string, error
 		}
 	} else {
 		javaBin = filepath.Join(options.JvmDir, "bin/java")
+	}
+
+	jdkVersion, err := DetectJvmVersion(javaBin)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	properties := make(map[string]string)
@@ -61,6 +91,11 @@ func (options *Options) JavaExecution(daemonize bool) ([]string, []string, error
 
 	command := []string{javaBin, "-cp", classpath}
 	command = append(command, options.JvmConfig...)
+
+	if perJdkConfig, exists := jvmSpecificConfig[GetMajorJavaVersion(jdkVersion)]; exists {
+		command = append(command, perJdkConfig...)
+	}
+
 	if len(options.JvmOptions) != 0 {
 		command = append(command, strings.Join(options.JvmOptions, " "))
 	}

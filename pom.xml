@@ -14,6 +14,13 @@
     <name>launcher</name>
     <description>Launcher for Airlift-based Java applications</description>
 
+    <scm>
+        <connection>scm:git:git://github.com/airlift/launcher.git</connection>
+        <developerConnection>scm:git:git@github.com:airlift/launcher.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/airlift/launcher</url>
+    </scm>
+
     <properties>
         <air.main.basedir>${project.parent.basedir}</air.main.basedir>
     </properties>

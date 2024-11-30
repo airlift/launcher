@@ -40,4 +40,4 @@ if [ ! -f "${LAUNCHER_BIN}" ]; then
   exit 1
 fi
 
-"${LAUNCHER_BIN}" "$@"
+exec "${LAUNCHER_BIN}" "$@"

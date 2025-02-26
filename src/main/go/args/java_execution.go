@@ -16,8 +16,8 @@ func getArchSpecificDirectory() string {
 	return fmt.Sprintf("%s-%s", runtime.GOOS, runtime.GOARCH)
 }
 
-func DetectJvmVersion(javaBin string) (string, error) {
-	command := exec.Command(javaBin, "-version")
+func DetectJvmVersion(javaBin string, jvmConfig []string) (string, error) {
+	command := exec.Command(javaBin, append(jvmConfig, "-version")...)
 	output, err := command.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("could not exec java to determine jvm version: %w", err)
@@ -53,7 +53,7 @@ func (options *Options) JavaExecution(daemonize bool) ([]string, []string, error
 		javaBin = filepath.Join(options.JvmDir, "bin/java")
 	}
 
-	jdkVersion, err := DetectJvmVersion(javaBin)
+	jdkVersion, err := DetectJvmVersion(javaBin, options.JvmConfig)
 	if err != nil {
 		return nil, nil, err
 	}

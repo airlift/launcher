@@ -3,6 +3,7 @@ package args
 import (
 	"fmt"
 	"launcher/directory"
+	"maps"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -58,9 +59,7 @@ func (options *Options) JavaExecution(daemonize bool) ([]string, []string, error
 	}
 
 	properties := make(map[string]string)
-	for k, v := range options.SystemProperties {
-		properties[k] = v
-	}
+	maps.Copy(properties, options.SystemProperties)
 
 	if directory.Exists(options.LogLevelFile) {
 		properties["log.levels-file"] = options.LogLevelFile

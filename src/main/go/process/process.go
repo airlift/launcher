@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/theckman/go-flock"
+	"github.com/gofrs/flock"
 )
 
 type LockablePidFile interface {

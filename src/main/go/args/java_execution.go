@@ -55,7 +55,10 @@ func (options *Options) JavaExecution(daemonize bool) ([]string, []string, error
 
 	jdkVersion, err := DetectJvmVersion(javaBin, options.JvmConfig)
 	if err != nil {
-		return nil, nil, err
+		jdkVersion, err = DetectJvmVersion(javaBin, []string{})
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	properties := make(map[string]string)

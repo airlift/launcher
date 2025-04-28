@@ -14,9 +14,11 @@ cd "${DIR}" || exit
 
 OUTPUT_DIR="../../../target/binaries/"
 EXECUTABLE_NAME="launcher"
+VERSION=${1:-$(git describe HEAD)}
 
 go get launcher
 
+echo "Building with version: ${VERSION}"
 echo "Output directory: ${DIR}/${OUTPUT_DIR}"
 
 build_for_os_and_arch() {
@@ -25,7 +27,7 @@ build_for_os_and_arch() {
     path="${1}-${2}"
 
   echo "Building for ${os}/${arch} into ${path}/${EXECUTABLE_NAME}"
-  CGO_ENABLED=0 GOOS="${os}" GOARCH="${arch}" go build -ldflags="-s -w -extldflags=-static -X launcher/args.Version=$(git describe HEAD)" -o "${DIR}/${OUTPUT_DIR}${path}/${EXECUTABLE_NAME}" .
+  CGO_ENABLED=0 GOOS="${os}" GOARCH="${arch}" go build -ldflags="-s -w -extldflags=-static -X launcher/args.Version=${VERSION}" -o "${DIR}/${OUTPUT_DIR}${path}/${EXECUTABLE_NAME}" .
 
   echo "Done building for ${os}/${arch}, size: $(du -sh "${DIR}/${OUTPUT_DIR}${path}/${EXECUTABLE_NAME}" | cut -f1)"
 }

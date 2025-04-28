@@ -40,6 +40,9 @@
                         <phase>compile</phase>
                         <configuration>
                             <executable>src/main/go/build.sh</executable>
+                            <arguments>
+                                <argument>${project.version}</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                     <execution>

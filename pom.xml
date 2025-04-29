@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>launcher</artifactId>
-    <version>304</version>
+    <version>305-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>launcher</name>
     <description>Launcher for Airlift-based Java applications</description>
@@ -17,7 +17,7 @@
     <scm>
         <connection>scm:git:git://github.com/airlift/launcher.git</connection>
         <developerConnection>scm:git:git@github.com:airlift/launcher.git</developerConnection>
-        <tag>304</tag>
+        <tag>HEAD</tag>
         <url>https://github.com/airlift/launcher</url>
     </scm>
 

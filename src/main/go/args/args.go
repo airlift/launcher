@@ -228,7 +228,9 @@ func ParseOptions(fs afero.Fs, installPath string, args []string) (commands.Comm
 
 	// Copy node.config properties into system properties
 	for key, value := range options.NodeConfig {
-		options.SystemProperties[key] = value
+		if _, exists := options.SystemProperties[key]; !exists {
+			options.SystemProperties[key] = value
+		}
 	}
 
 	if options.Verbose {

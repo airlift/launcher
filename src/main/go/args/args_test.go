@@ -23,6 +23,33 @@ func TestParseCommandNameFirst(t *testing.T) {
 	}
 }
 
+func TestMergingProperties(t *testing.T) {
+	t.Setenv("JAVA_HOME", "")
+	fs := setup(t)
+
+	file, err := fs.Create("/etc/dir/node.properties")
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	file.WriteString("node.id=from-file\nnode.name=test\n")
+
+	_, options, err := ParseOptions(fs, "/usr/local", []string{"--etc-dir", "/etc/dir", "-Dnode.id=from-cmd", "start"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	node_id, _ := options.SystemProperties["node.id"]
+	if node_id != "from-cmd" {
+		t.Fatalf("Expected node.id to be 'from-cmd' but got '%s'", node_id)
+	}
+
+	node_name, _ := options.SystemProperties["node.name"]
+	if node_name != "test" {
+		t.Fatalf("Expected node.name to be 'test' but got '%s'", node_name)
+	}
+}
+
 func TestParseCommandNameLast(t *testing.T) {
 	t.Setenv("JAVA_HOME", "")
 	fs := setup(t)

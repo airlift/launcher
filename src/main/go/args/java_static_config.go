@@ -7,4 +7,5 @@ var jvmSpecificConfig = map[string][]string{
 	"22": {vectorApiIncubating},
 	"23": {vectorApiIncubating},
 	"24": {vectorApiIncubating, allowUnsafeUsage},
+	"25": {vectorApiIncubating, allowUnsafeUsage},
 }

@@ -36,7 +36,9 @@ func ExtractJvmVersion(output string) (string, error) {
 }
 
 func GetMajorJavaVersion(javaVersion string) string {
-	components := strings.Split(javaVersion, ".")
+	components := strings.FieldsFunc(javaVersion, func(r rune) bool {
+		return r == '.' || r == '-'
+	})
 	return components[0]
 }
 

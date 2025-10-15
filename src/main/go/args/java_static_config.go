@@ -7,13 +7,16 @@ const vectorApiIncubating = "--add-modules=jdk.incubator.vector"
 const allowUnsafeUsage = "--sun-misc-unsafe-memory-access=allow"
 const allowNativeUsage = "--enable-native-access=ALL-UNNAMED"
 
+// https://openjdk.org/jeps/451, required by JOL to estimate instances size
+const allowDynamicAgentLoading = "-XX:+EnableDynamicAgentLoading"
+
 var jvmSpecificConfig = map[string][]string{
-	"21": {rewriteBytecodes},
-	"22": {rewriteBytecodes, vectorApiIncubating},
-	"23": {rewriteBytecodes, vectorApiIncubating},
-	"24": {rewriteBytecodes, vectorApiIncubating, allowUnsafeUsage, allowNativeUsage},
-	"25": {rewriteBytecodes, vectorApiIncubating, allowUnsafeUsage, allowNativeUsage},
-	"26": {rewriteBytecodes, vectorApiIncubating, allowUnsafeUsage, allowNativeUsage},
+	"21": {rewriteBytecodes, allowDynamicAgentLoading},
+	"22": {rewriteBytecodes, allowDynamicAgentLoading, vectorApiIncubating},
+	"23": {rewriteBytecodes, allowDynamicAgentLoading, vectorApiIncubating},
+	"24": {rewriteBytecodes, allowDynamicAgentLoading, vectorApiIncubating, allowUnsafeUsage, allowNativeUsage},
+	"25": {rewriteBytecodes, allowDynamicAgentLoading, vectorApiIncubating, allowUnsafeUsage, allowNativeUsage},
+	"26": {rewriteBytecodes, allowDynamicAgentLoading, vectorApiIncubating, allowUnsafeUsage, allowNativeUsage},
 }
 
 func onArm64Only(option string) string {

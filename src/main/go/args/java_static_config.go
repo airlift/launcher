@@ -4,6 +4,8 @@ import "runtime"
 
 var rewriteBytecodes = onArm64Only("-XX:-RewriteBytecodes") // https://bugs.openjdk.org/browse/JDK-8369506
 const vectorApiIncubating = "--add-modules=jdk.incubator.vector"
+
+// https://openjdk.org/jeps/498, allows deprecated unsafe usage
 const allowUnsafeUsage = "--sun-misc-unsafe-memory-access=allow"
 
 // https://openjdk.org/jeps/472, allows native libraries to be loaded from unnamed modules

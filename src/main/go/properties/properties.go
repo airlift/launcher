@@ -3,15 +3,12 @@ package properties
 import (
 	"errors"
 	"fmt"
-	"github.com/spf13/afero"
 	"io"
-	"os"
 	"strings"
 	"unicode/utf8"
-)
 
-const envPropertyPrefix = "${ENV:"
-const envPropertySuffix = "}"
+	"github.com/spf13/afero"
+)
 
 // LoadFile loads key/value pairs from a file
 func LoadFile(fs afero.Fs, filename string) (map[string]string, error) {
@@ -153,21 +150,6 @@ func loadConvert(in []byte, off int, len int) (string, error) {
 		}
 	}
 	return string(out), nil
-}
-
-func findEnvironmentVariable(key string) (string, error) {
-	for _, e := range os.Environ() {
-		pair := strings.SplitN(e, "=", 2)
-		if len(pair) < 2 {
-			continue
-		}
-
-		if pair[0] == key {
-			return pair[1], nil
-		}
-	}
-
-	return "", fmt.Errorf("could not find environment variable: %s", key)
 }
 
 func Parse(args []string) (map[string]string, error) {

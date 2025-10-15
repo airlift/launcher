@@ -96,8 +96,12 @@ func (options *Options) JavaExecution(daemonize bool) ([]string, []string, error
 	command := []string{javaBin, "-cp", classpath}
 	command = append(command, options.JvmConfig...)
 
-	if perJdkConfig, exists := jvmSpecificConfig[GetMajorJavaVersion(jdkVersion)]; exists {
-		command = append(command, perJdkConfig...)
+	if perJdkConfigs, exists := jvmSpecificConfig[GetMajorJavaVersion(jdkVersion)]; exists {
+		for _, perJdkConfig := range perJdkConfigs {
+			if perJdkConfig != "" {
+				command = append(command, perJdkConfig)
+			}
+		}
 	}
 
 	if len(options.JvmOptions) != 0 {

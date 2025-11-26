@@ -16,13 +16,16 @@ const allowNativeUsage = "--enable-native-access=ALL-UNNAMED"
 // https://openjdk.org/jeps/451, required by JOL to estimate instances size
 const allowDynamicAgentLoading = "-XX:+EnableDynamicAgentLoading"
 
+// https://openjdk.org/jeps/519, reduces object header size to 64 bit
+const compactObjectHeaders = "-XX:+UseCompactObjectHeaders"
+
 var jvmSpecificConfig = map[string][]string{
 	"21": {rewriteBytecodes, allowDynamicAgentLoading},
 	"22": {rewriteBytecodes, allowDynamicAgentLoading, vectorApiIncubating},
 	"23": {rewriteBytecodes, allowDynamicAgentLoading, vectorApiIncubating},
 	"24": {rewriteBytecodes, allowDynamicAgentLoading, vectorApiIncubating, allowUnsafeUsage, allowNativeUsage},
-	"25": {rewriteBytecodes, allowDynamicAgentLoading, vectorApiIncubating, allowUnsafeUsage, allowNativeUsage},
-	"26": {rewriteBytecodes, allowDynamicAgentLoading, vectorApiIncubating, allowUnsafeUsage, allowNativeUsage},
+	"25": {rewriteBytecodes, allowDynamicAgentLoading, vectorApiIncubating, allowUnsafeUsage, allowNativeUsage, compactObjectHeaders},
+	"26": {rewriteBytecodes, allowDynamicAgentLoading, vectorApiIncubating, allowUnsafeUsage, allowNativeUsage, compactObjectHeaders},
 }
 
 func onArm64Only(option string) string {

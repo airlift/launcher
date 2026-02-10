@@ -4,11 +4,11 @@ updates:
     directory: '/src/main/go'
     schedule:
       interval: 'weekly'
-      open-pull-requests-limit: 10
-      cooldown:
-        # Apply 7 day cooldown to avoid updating dependencies right away. This reduces the opportunity window
-        # when supply chain is compromised.
-        default-days: 7
+    open-pull-requests-limit: 10
+    cooldown:
+      # Apply 7 day cooldown to avoid updating dependencies right away. This reduces the opportunity window
+      # when supply chain is compromised.
+      default-days: 7
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

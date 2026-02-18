@@ -121,7 +121,7 @@ func loadConvert(in []byte, off int, len int) (string, error) {
 				return "", errors.New("malformed \\uxxxx encoding")
 			}
 			var value int
-			for i := 0; i < 4; i++ {
+			for range 4 {
 				aChar = in[off]
 				off++
 				switch aChar {

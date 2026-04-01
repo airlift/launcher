@@ -3,7 +3,7 @@ module launcher
 go 1.26.1
 
 require (
-	github.com/fatih/color v1.18.0
+	github.com/fatih/color v1.19.0
 	github.com/gofrs/flock v0.13.0
 	github.com/spf13/afero v1.15.0
 	golang.org/x/sys v0.42.0

@@ -96,7 +96,7 @@ func (options *Options) JavaExecution(daemonize bool) ([]string, []string, error
 	command := []string{javaBin, "-cp", classpath}
 	command = append(command, options.JvmConfig...)
 
-    majorJavaVersion := GetMajorJavaVersion(jdkVersion);
+	majorJavaVersion := GetMajorJavaVersion(jdkVersion)
 	if perJdkConfigs, exists := jvmSpecificConfig[majorJavaVersion]; exists {
 		for _, perJdkConfig := range perJdkConfigs {
 			if perJdkConfig != "" {
@@ -104,11 +104,10 @@ func (options *Options) JavaExecution(daemonize bool) ([]string, []string, error
 			}
 		}
 
-        if options.Verbose {
-            fmt.Printf("Implicit JVM %s config: %v\n", majorJavaVersion, perJdkConfigs)
-        }
+		if options.Verbose {
+			fmt.Printf("Implicit JVM %s config: %v\n", majorJavaVersion, perJdkConfigs)
+		}
 	}
-
 
 	if len(options.JvmOptions) != 0 {
 		command = append(command, strings.Join(options.JvmOptions, " "))

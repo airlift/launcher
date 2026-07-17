@@ -126,7 +126,7 @@ func TestLoad(t *testing.T) {
 					different = append(different, fmt.Sprintf("Expected value for key %s to be `%s` but got `%s`", key, expectedValue, actualValue))
 				}
 			}
-			for key, _ := range actual {
+			for key := range actual {
 				_, ok := tc.expected[key]
 				if !ok {
 					additional = append(additional, key)

@@ -110,7 +110,7 @@ func (options *Options) JavaExecution(daemonize bool) ([]string, []string, error
 	}
 
 	if len(options.JvmOptions) != 0 {
-		command = append(command, strings.Join(options.JvmOptions, " "))
+		command = append(command, options.JvmOptions...)
 	}
 	system := getArchSpecificDirectory()
 	agentName := options.LauncherConfig["agent-name"]

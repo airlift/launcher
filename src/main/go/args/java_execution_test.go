@@ -1,6 +1,9 @@
 package args
 
-import "testing"
+import (
+	"os/exec"
+	"testing"
+)
 
 func TestParsingJvmVersion(t *testing.T) {
 	testCases := []struct {
@@ -25,5 +28,35 @@ func TestParsingJvmVersion(t *testing.T) {
 		if actualVersion != testCase.expectedVersion {
 			t.Fatalf("Expected Java version %s for output %s", testCase.expectedVersion, testCase.output)
 		}
+	}
+}
+
+func TestJavaExecutionMultipleJvmOptions(t *testing.T) {
+	if _, err := exec.LookPath("java"); err != nil {
+		t.Skip("java not on PATH")
+	}
+
+	options := &Options{
+		JvmConfig:        []string{},
+		JvmOptions:       []string{"-Xmx4g", "-Xms2g"},
+		LauncherConfig:   map[string]string{"main-class": "com.example.Main"},
+		SystemProperties: map[string]string{},
+		ConfigPath:       "/etc/config.properties",
+	}
+
+	command, _, err := options.JavaExecution(false)
+	if err != nil {
+		t.Fatalf("JavaExecution failed: %v", err)
+	}
+
+	found := false
+	for i := 0; i < len(command)-1; i++ {
+		if command[i] == "-Xmx4g" && command[i+1] == "-Xms2g" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected -Xmx4g and -Xms2g as consecutive separate arguments, got: %v", command)
 	}
 }

@@ -138,6 +138,9 @@ func (options *Options) JavaExecution(daemonize bool) ([]string, []string, error
 		env[pair[0]] = pair[1]
 	}
 
+	// Variables from env.properties take precedence over the inherited environment
+	maps.Copy(env, options.EnvConfig)
+
 	processName := options.LauncherConfig["process-name"]
 	if processName != "" {
 		shim := filepath.Join(options.InstallPath, "bin", system, "libprocname.so")

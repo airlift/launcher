@@ -2,6 +2,7 @@ package args
 
 import (
 	"launcher/commands"
+	"maps"
 	"testing"
 
 	"github.com/spf13/afero"
@@ -230,6 +231,64 @@ func TestMissing(t *testing.T) {
 	})
 }
 
+func TestEnvConfig(t *testing.T) {
+	t.Setenv("JAVA_HOME", "")
+
+	t.Run("loaded from etc dir", func(t *testing.T) {
+		fs := setup(t)
+		file, err := fs.Create("/etc/dir/env.properties")
+		must(t, err)
+		_, err = file.WriteString("# glibc tuning\nMALLOC_ARENA_MAX=4\nFOO = bar baz\n")
+		must(t, err)
+		must(t, file.Close())
+
+		_, options, err := ParseOptions(fs, "/usr/local", []string{"--etc-dir", "/etc/dir", "start"})
+		must(t, err)
+
+		if options.EnvConfigPath != "/etc/dir/env.properties" {
+			t.Fatalf("Expected options.EnvConfigPath to be /etc/dir/env.properties but got %s", options.EnvConfigPath)
+		}
+		expected := map[string]string{"MALLOC_ARENA_MAX": "4", "FOO": "bar baz"}
+		if !maps.Equal(expected, options.EnvConfig) {
+			t.Fatalf("Expected options.EnvConfig to be %v but got %v", expected, options.EnvConfig)
+		}
+	})
+
+	t.Run("explicitly provided", func(t *testing.T) {
+		fs := setup(t)
+		file, err := fs.Create("/custom/env.properties")
+		must(t, err)
+		_, err = file.WriteString("MALLOC_ARENA_MAX=2\n")
+		must(t, err)
+		must(t, file.Close())
+
+		_, options, err := ParseOptions(fs, "/usr/local", []string{"--etc-dir", "/etc/dir", "--env-config", "/custom/env.properties", "start"})
+		must(t, err)
+
+		if options.EnvConfig["MALLOC_ARENA_MAX"] != "2" {
+			t.Fatalf("Expected MALLOC_ARENA_MAX to be 2 but got %v", options.EnvConfig)
+		}
+	})
+
+	t.Run("explicitly provided but missing", func(t *testing.T) {
+		fs := setup(t)
+		_, _, err := ParseOptions(fs, "/usr/local", []string{"--etc-dir", "/etc/dir", "--env-config", "/custom/env.properties", "start"})
+		testErr(t, err, "env config file is missing: could not find file: /custom/env.properties")
+	})
+
+	t.Run("invalid variable name", func(t *testing.T) {
+		fs := setup(t)
+		file, err := fs.Create("/etc/dir/env.properties")
+		must(t, err)
+		_, err = file.WriteString("1INVALID=value\n")
+		must(t, err)
+		must(t, file.Close())
+
+		_, _, err = ParseOptions(fs, "/usr/local", []string{"--etc-dir", "/etc/dir", "start"})
+		testErr(t, err, "env config file contains invalid environment variable name: '1INVALID'")
+	})
+}
+
 func TestInvalidProperties(t *testing.T) {
 	t.Setenv("JAVA_HOME", "")
 	fs := setup(t)
@@ -284,9 +343,11 @@ NodeConfigPath  = /etc/dir/node.properties
 LauncherLog     = /data/dir/var/log/launcher.log
 ServerLog       = /data/dir/var/log/server.log
 LogLevelFile    = 
+EnvConfigPath   = 
 JvmDir          = 
 LauncherConfig  = map[]
 NodeConfig      = map[node.data-dir:/data/dir]
+EnvConfig       = map[]
 JvmConfig       = []
 JvmOptions      = []
 SystemProperties = map[node.data-dir:/data/dir]

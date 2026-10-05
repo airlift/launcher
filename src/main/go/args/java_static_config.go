@@ -1,6 +1,10 @@
 package args
 
-import "runtime"
+import (
+	"fmt"
+	"runtime"
+	"strconv"
+)
 
 var rewriteBytecodes = onArm64Only("-XX:-RewriteBytecodes") // https://bugs.openjdk.org/browse/JDK-8369506
 
@@ -28,6 +32,35 @@ var jvmSpecificConfig = map[string][]string{
 	"26": {allowDynamicAgentLoading, vectorApiIncubating, allowUnsafeUsage, allowNativeUsage, compactObjectHeaders},
 	"27": {allowDynamicAgentLoading, vectorApiIncubating, allowUnsafeUsage, allowNativeUsage},
 	"28": {allowDynamicAgentLoading, vectorApiIncubating, allowUnsafeUsage, allowNativeUsage},
+}
+
+// getJvmSpecificConfig returns the static config for the given major JVM version,
+// falling back to the latest known config when the version is newer than any known one.
+// The second return value is the version whose config was selected.
+func getJvmSpecificConfig(majorJavaVersion string) ([]string, string, error) {
+	if config, exists := jvmSpecificConfig[majorJavaVersion]; exists {
+		return config, majorJavaVersion, nil
+	}
+
+	version, err := strconv.Atoi(majorJavaVersion)
+	if err != nil {
+		return nil, "", fmt.Errorf("unrecognized major JVM version: %s", majorJavaVersion)
+	}
+
+	latestVersion := 0
+	for knownVersion := range jvmSpecificConfig {
+		known, err := strconv.Atoi(knownVersion)
+		if err == nil && known > latestVersion {
+			latestVersion = known
+		}
+	}
+
+	if version > latestVersion {
+		latest := strconv.Itoa(latestVersion)
+		return jvmSpecificConfig[latest], latest, nil
+	}
+
+	return nil, "", fmt.Errorf("no static config for major JVM version: %s", majorJavaVersion)
 }
 
 func onArm64Only(option string) string {

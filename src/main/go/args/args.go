@@ -313,12 +313,10 @@ func (options *Options) CreateAppSymlinks() error {
 }
 
 func (options *Options) String() string {
-	v := reflect.ValueOf(*options)
 	var builder strings.Builder
-	for i := 0; i < v.NumField(); i++ {
-		field := v.Type().Field(i)
-		if !strings.Contains(v.Type().Field(i).Type.String(), "func()") {
-			builder.WriteString(fmt.Sprintf("%-15s = %v\n", field.Name, v.Field(i).Interface()))
+	for field, value := range reflect.ValueOf(*options).Fields() {
+		if !strings.Contains(field.Type.String(), "func()") {
+			builder.WriteString(fmt.Sprintf("%-15s = %v\n", field.Name, value.Interface()))
 		}
 	}
 	return builder.String()

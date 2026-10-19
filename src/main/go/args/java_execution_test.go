@@ -2,6 +2,7 @@ package args
 
 import (
 	"os/exec"
+	"slices"
 	"testing"
 )
 
@@ -58,5 +59,35 @@ func TestJavaExecutionMultipleJvmOptions(t *testing.T) {
 	}
 	if !found {
 		t.Errorf("expected -Xmx4g and -Xms2g as consecutive separate arguments, got: %v", command)
+	}
+}
+
+func TestJavaExecutionEnvConfig(t *testing.T) {
+	if _, err := exec.LookPath("java"); err != nil {
+		t.Skip("java not on PATH")
+	}
+	t.Setenv("MALLOC_ARENA_MAX", "8")
+	t.Setenv("LAUNCHER_TEST_INHERITED", "inherited")
+
+	options := &Options{
+		JvmConfig:        []string{},
+		LauncherConfig:   map[string]string{"main-class": "com.example.Main"},
+		SystemProperties: map[string]string{},
+		EnvConfig:        map[string]string{"MALLOC_ARENA_MAX": "4", "LAUNCHER_TEST_ADDED": "added"},
+		ConfigPath:       "/etc/config.properties",
+	}
+
+	_, env, err := options.JavaExecution(false)
+	if err != nil {
+		t.Fatalf("JavaExecution failed: %v", err)
+	}
+
+	for _, expected := range []string{"MALLOC_ARENA_MAX=4", "LAUNCHER_TEST_ADDED=added", "LAUNCHER_TEST_INHERITED=inherited"} {
+		if !slices.Contains(env, expected) {
+			t.Errorf("expected environment to contain %s, got: %v", expected, env)
+		}
+	}
+	if slices.Contains(env, "MALLOC_ARENA_MAX=8") {
+		t.Errorf("expected env config to override inherited MALLOC_ARENA_MAX, got: %v", env)
 	}
 }

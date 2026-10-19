@@ -11,6 +11,7 @@ import (
 	"path"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 
 	"github.com/fatih/color"
@@ -18,6 +19,8 @@ import (
 )
 
 var Version string
+
+var envVariableName = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*$`)
 
 type Options struct {
 	Verbose            bool
@@ -32,10 +35,12 @@ type Options struct {
 	LauncherLog        string
 	ServerLog          string
 	LogLevelFile       string
+	EnvConfigPath      string
 	JvmDir             string
 
 	LauncherConfig   map[string]string
 	NodeConfig       map[string]string
+	EnvConfig        map[string]string
 	JvmConfig        []string // jvm.config
 	JvmOptions       []string // -J passed options
 	SystemProperties map[string]string
@@ -54,6 +59,7 @@ type parseFlags struct {
 	configOpt           string
 	secretsConfigOpt    string
 	logLevelsFileOpt    string
+	envConfigOpt        string
 	jvmDir              string
 	dataDirOpt          string
 	pidFileOpt          string
@@ -110,6 +116,7 @@ func newParseFlags() *parseFlags {
 	flags.StringVar(&parseFlags.configOpt, "config", "", "Defaults to ETC_DIR/config.properties")
 	flags.StringVar(&parseFlags.secretsConfigOpt, "secrets-config", "", "Defaults to ETC_DIR/secrets.toml")
 	flags.StringVar(&parseFlags.logLevelsFileOpt, "log-levels-file", "", "Defaults to ETC_DIR/log.properties")
+	flags.StringVar(&parseFlags.envConfigOpt, "env-config", "", "Defaults to ETC_DIR/env.properties")
 	flags.StringVar(&parseFlags.jvmDir, "jvm-dir", "", "JVM installation directory")
 	flags.StringVar(&parseFlags.dataDirOpt, "data-dir", "", "Defaults to INSTALL_PATH")
 	flags.StringVar(&parseFlags.pidFileOpt, "pid-file", "", "Defaults to DATA_DIR/var/run/launcher.pid")
@@ -141,6 +148,7 @@ func ParseOptions(fs afero.Fs, installPath string, args []string) (commands.Comm
 	options.InstallPath = installPath
 	options.JvmOptions = flags.jvmOpt
 	options.NodeConfig = make(map[string]string)
+	options.EnvConfig = make(map[string]string)
 	options.JvmConfig = []string{}
 	options.SystemProperties = make(map[string]string)
 	options.LauncherConfig = make(map[string]string)
@@ -192,6 +200,26 @@ func ParseOptions(fs afero.Fs, installPath string, args []string) (commands.Comm
 	options.LogLevelFile, err = ResolveFile(fs, flags.logLevelsFileOpt, filepath.Join(options.EtcDir, "log.properties"))
 	if flags.logLevelsFileOpt != "" && err != nil {
 		return commands.UNKNOWN, nil, fmt.Errorf("log levels file is missing: %w", err)
+	}
+
+	options.EnvConfigPath, err = ResolveFile(fs, flags.envConfigOpt, filepath.Join(options.EtcDir, "env.properties"))
+	if err != nil {
+		if flags.envConfigOpt != "" {
+			return commands.UNKNOWN, nil, fmt.Errorf("env config file is missing: %w", err)
+		}
+		options.EnvConfigPath = ""
+	}
+
+	if options.EnvConfigPath != "" {
+		options.EnvConfig, err = properties.LoadFile(fs, options.EnvConfigPath)
+		if err != nil {
+			return commands.UNKNOWN, nil, fmt.Errorf("could not read env config file: %w", err)
+		}
+		for name := range options.EnvConfig {
+			if !envVariableName.MatchString(name) {
+				return commands.UNKNOWN, nil, fmt.Errorf("env config file contains invalid environment variable name: '%s'", name)
+			}
+		}
 	}
 
 	if flags.jvmDir != "" || os.Getenv("JAVA_HOME") != "" {
